@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TaskHeader from '../../components/TaskHeader.astro';
+import CopyButton from '../../components/CopyButton';
+import HintAccordion from '../../components/HintAccordion';
+
+export async function getStaticPaths() {
+  const tasks = await getCollection('tasks');
+  return tasks.map((task) => ({
+    params: { slug: task.id },
+    props: { task },
+  }));
+}
+
+const { task } = Astro.props;
+const { Content } = await task.render();
+
+// Get all tasks sorted by slug for navigation
+const allTasks = await getCollection('tasks');
+const sortedTasks = allTasks.sort((a, b) => a.id.localeCompare(b.id));
+const currentIndex = sortedTasks.findIndex((t) => t.id === task.id);
+
+const prevSlug = currentIndex > 0 ? sortedTasks[currentIndex - 1].id : undefined;
+const nextSlug = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1].id : undefined;
+
+const difficultyColors = {
+  easy: 'bg-green-600',
+  medium: 'bg-yellow-600',
+  hard: 'bg-red-600',
+};
+---
+
+<BaseLayout title={`${task.data.title} - React Live Coding Practice`} description={task.data.description}>
+  <TaskHeader currentSlug={task.id} prevSlug={prevSlug} nextSlug={nextSlug} />
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <!-- Task Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-white mb-4">{task.data.title}</h1>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class={`px-3 py-1 rounded-full text-sm font-medium text-white ${difficultyColors[task.data.difficulty]}`}>
+          {task.data.difficulty.charAt(0).toUpperCase() + task.data.difficulty.slice(1)}
+        </span>
+        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm font-medium text-gray-200">
+          ⏱️ ~{task.data.timeEstimate} min
+        </span>
+        {task.data.tags.map((tag) => (
+          <span class="px-3 py-1 bg-blue-900 text-blue-200 rounded-full text-sm font-medium">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <p class="text-gray-300 text-lg">{task.data.description}</p>
+    </div>
+
+    <!-- Learning Goals -->
+    <section class="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <h2 class="text-2xl font-semibold text-white mb-4">🎯 Learning Goals</h2>
+      <ul class="list-disc list-inside space-y-2 text-gray-300">
+        {task.data.learningGoals.map((goal) => (
+          <li>{goal}</li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Task Description -->
+    <section class="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700 prose prose-invert max-w-none">
+      <h2 class="text-2xl font-semibold text-white mb-4">📝 Task Description</h2>
+      <div class="text-gray-300">
+        <Content />
+      </div>
+    </section>
+
+    <!-- Hints -->
+    <section class="mb-8">
+      <HintAccordion hints={task.data.hints} client:load />
+    </section>
+
+    <!-- Starter Code -->
+    <section class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-white">🚀 Starter Code (App.tsx)</h2>
+        <CopyButton code={task.data.starterCode} client:load />
+      </div>
+      <div class="bg-gray-900 rounded-lg overflow-x-auto">
+        <pre class="p-4"><code class="language-tsx">{task.data.starterCode}</code></pre>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
