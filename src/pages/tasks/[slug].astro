@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TaskHeader from '../../components/TaskHeader.astro';
 import CopyButton from '../../components/CopyButton';
 import HintAccordion from '../../components/HintAccordion';
+import TaskSidebar from '../../components/TaskSidebar';
 
 export async function getStaticPaths() {
   const tasks = await getCollection('tasks');
@@ -24,78 +25,81 @@ const currentIndex = sortedTasks.findIndex((t) => t.id === task.id);
 const prevSlug = currentIndex > 0 ? sortedTasks[currentIndex - 1].id : undefined;
 const nextSlug = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1].id : undefined;
 
+// Prepare tasks data for sidebar
+const sidebarTasks = sortedTasks.map((t) => ({
+  id: t.id,
+  title: t.data.title,
+  difficulty: t.data.difficulty,
+}));
+
 const difficultyColors = {
-  easy: 'text-emerald-400 border-emerald-400/30',
-  medium: 'text-amber-400 border-amber-400/30',
-  hard: 'text-rose-400 border-rose-400/30',
+  easy: 'bg-green-600',
+  medium: 'bg-yellow-600',
+  hard: 'bg-red-600',
 };
 ---
 
 <BaseLayout title={`${task.data.title} - React Live Coding Practice`} description={task.data.description}>
-  <TaskHeader currentSlug={task.id} prevSlug={prevSlug} nextSlug={nextSlug} />
+  <TaskSidebar tasks={sidebarTasks} currentTaskId={task.id} client:load />
 
-  <main class="max-w-4xl mx-auto">
-    <!-- Hero Section -->
-    <div class="mb-16">
-      <h1 class="text-5xl font-bold tracking-tight mb-6 leading-tight">{task.data.title}</h1>
+  <div class="transition-all duration-300" id="main-content">
+    <TaskHeader currentSlug={task.id} prevSlug={prevSlug} nextSlug={nextSlug} />
 
-      <div class="flex flex-wrap items-center gap-3 mb-6">
-        <span class={`px-3 py-1 rounded-md text-xs font-medium border ${difficultyColors[task.data.difficulty]} bg-transparent`}>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <!-- Task Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-white mb-4">{task.data.title}</h1>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class={`px-3 py-1 rounded-full text-sm font-medium text-white ${difficultyColors[task.data.difficulty]}`}>
           {task.data.difficulty.charAt(0).toUpperCase() + task.data.difficulty.slice(1)}
         </span>
-        <span class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border border-neutral-800 text-neutral-400 bg-transparent">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {task.data.timeEstimate} min
+        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm font-medium text-gray-200">
+          ⏱️ ~{task.data.timeEstimate} min
         </span>
         {task.data.tags.map((tag) => (
-          <span class="px-3 py-1 rounded-md text-xs font-medium border border-neutral-800 text-neutral-400 bg-transparent">
+          <span class="px-3 py-1 bg-blue-900 text-blue-200 rounded-full text-sm font-medium">
             {tag}
           </span>
         ))}
       </div>
 
-      <p class="text-lg text-neutral-400 leading-relaxed">{task.data.description}</p>
+      <p class="text-gray-300 text-lg">{task.data.description}</p>
     </div>
 
     <!-- Learning Goals -->
-    <section class="mb-12 border border-neutral-800 rounded-lg p-8">
-      <h2 class="text-xl font-semibold mb-4 tracking-tight">Learning Goals</h2>
-      <ul class="space-y-3 text-neutral-400">
+    <section class="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <h2 class="text-2xl font-semibold text-white mb-4">🎯 Learning Goals</h2>
+      <ul class="list-disc list-inside space-y-2 text-gray-300">
         {task.data.learningGoals.map((goal) => (
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 mt-0.5 text-neutral-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <span>{goal}</span>
-          </li>
+          <li>{goal}</li>
         ))}
       </ul>
     </section>
 
     <!-- Task Description -->
-    <section class="mb-12 border border-neutral-800 rounded-lg p-8">
-      <h2 class="text-xl font-semibold mb-4 tracking-tight">Task Description</h2>
-      <div class="prose prose-invert prose-neutral max-w-none text-neutral-400 prose-headings:text-white prose-headings:font-semibold prose-headings:tracking-tight prose-p:leading-relaxed prose-li:text-neutral-400 prose-code:text-neutral-300 prose-code:bg-neutral-900 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-normal prose-code:before:content-[''] prose-code:after:content-['']">
+    <section class="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700 prose prose-invert max-w-none">
+      <h2 class="text-2xl font-semibold text-white mb-4">📝 Task Description</h2>
+      <div class="text-gray-300">
         <Content />
       </div>
     </section>
 
     <!-- Hints -->
-    <section class="mb-12">
+    <section class="mb-8">
       <HintAccordion hints={task.data.hints} client:load />
     </section>
 
     <!-- Starter Code -->
-    <section class="border border-neutral-800 rounded-lg overflow-hidden">
-      <div class="flex justify-between items-center px-8 py-5 border-b border-neutral-800">
-        <h2 class="text-xl font-semibold tracking-tight">Starter Code</h2>
+    <section class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-white">🚀 Starter Code (App.tsx)</h2>
         <CopyButton code={task.data.starterCode} client:load />
       </div>
-      <div class="bg-black border-t border-neutral-800">
-        <pre class="p-6 overflow-x-auto text-sm leading-relaxed"><code class="language-tsx">{task.data.starterCode}</code></pre>
+      <div class="bg-gray-900 rounded-lg overflow-x-auto">
+        <pre class="p-4"><code class="language-tsx">{task.data.starterCode}</code></pre>
       </div>
     </section>
   </main>
+  </div>
 </BaseLayout>
