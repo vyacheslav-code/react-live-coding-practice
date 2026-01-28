@@ -16,8 +16,8 @@ learningGoals:
   - Use addEventListener with options
   - Handle touch events efficiently
 hints:
-  - Use addEventListener directly, not React's onClick
-  - Pass { passive: true } as third argument
+  - "Use addEventListener directly, not React's onClick"
+  - "Pass { passive: true } as third argument"
   - Passive listeners cannot call preventDefault()
   - Use useEffect for adding/removing listeners
   - Check Chrome DevTools for violation warnings

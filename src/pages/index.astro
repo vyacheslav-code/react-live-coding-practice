@@ -1,10 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-// Get all tasks for client-side random selection
-const allTasks = await getCollection('tasks');
-const taskSlugs = allTasks.map(task => task.id);
 ---
 
 <BaseLayout title="React Live Coding Practice">
@@ -16,9 +11,8 @@ const taskSlugs = allTasks.map(task => task.id);
     </div>
   </div>
 
-  <script define:vars={{ taskSlugs }}>
-    // Redirect to random task
-    const randomSlug = taskSlugs[Math.floor(Math.random() * taskSlugs.length)];
-    window.location.href = `/tasks/${randomSlug}`;
+  <script>
+    // Redirect to tasks index
+    window.location.href = '/tasks';
   </script>
 </BaseLayout>

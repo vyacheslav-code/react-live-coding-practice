@@ -401,23 +401,25 @@ starterCode: |
             borderRadius: '4px',
             overflow: 'auto',
             fontSize: '11px'
-          }}>{`import { after } from 'next/server';
+          }}>
+            {`import { after } from 'next/server';
 
-export async function GET(request) {
-  // Critical: Fetch data user needs
-  const user = await db.users.findById(userId);
-  const posts = await db.posts.findByUser(userId);
+  export async function GET(request) {
+    // Critical: Fetch data user needs
+    const user = await db.users.findById(userId);
+    const posts = await db.posts.findByUser(userId);
 
-  // Non-critical: Defer to after response
-  after(async () => {
-    await analytics.track('page_view', { userId });
-    await db.auditLog.create({ userId, action: 'viewed_profile' });
-    await cache.warm('related_users', userId);
-  });
+    // Non-critical: Defer to after response
+    after(async () => {
+      await analytics.track('page_view', { userId });
+      await db.auditLog.create({ userId, action: 'viewed_profile' });
+      await cache.warm('related_users', userId);
+    });
 
-  // Response sent immediately with critical data
-  return Response.json({ user, posts });
-}`}</pre>
+    // Response sent immediately with critical data
+    return Response.json({ user, posts });
+  }`}
+          </pre>
         </div>
       </div>
     );

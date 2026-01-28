@@ -13,8 +13,8 @@ learningGoals:
   - Measure rendering performance improvements
   - Use contain-intrinsic-size for scrollbar accuracy
 hints:
-  - Apply content-visibility: auto to list items
-  - Use contain-intrinsic-size to estimate item height
+  - "Apply content-visibility: auto to list items"
+  - "Use contain-intrinsic-size to estimate item height"
   - Browser skips rendering off-screen items
   - Works best with consistent item heights
 starterCode: |
