@@ -7,6 +7,7 @@ const tasks = defineCollection({
     description: z.string(),
     tags: z.array(z.string()),
     difficulty: z.enum(['easy', 'medium', 'hard']),
+    category: z.enum(['practice', 'pet-projects']).default('practice'),
     timeEstimate: z.number(),
     learningGoals: z.array(z.string()),
     hints: z.array(z.string()),

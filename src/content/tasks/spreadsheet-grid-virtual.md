@@ -8,6 +8,7 @@ tags:
   - keyboard-navigation
   - formulas
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement virtual scrolling for rendering 1000+ rows efficiently

@@ -30,6 +30,7 @@ const sidebarTasks = sortedTasks.map((t) => ({
   id: t.id,
   title: t.data.title,
   difficulty: t.data.difficulty,
+  category: t.data.category ?? 'practice',
 }));
 
 const difficultyColors = {
