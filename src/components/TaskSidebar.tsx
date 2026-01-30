@@ -109,8 +109,7 @@ export default function TaskSidebar({ tasks, currentTaskId }: TaskSidebarProps) 
         className="overflow-y-auto h-[calc(100vh-65px)] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent pb-16"
       >
         <nav className="py-2">
-          {/* Practice Tasks */}
-          {tasks.filter(t => t.category !== 'pet-projects').map((task) => {
+          {tasks.map((task) => {
             const isActive = task.id === currentTaskId;
             return (
               <a
@@ -141,49 +140,6 @@ export default function TaskSidebar({ tasks, currentTaskId }: TaskSidebarProps) 
               </a>
             );
           })}
-
-          {/* Pet Projects Section */}
-          {tasks.some(t => t.category === 'pet-projects') && (
-            <>
-              <div className="px-4 py-3 mt-4 border-t border-gray-800">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Pet Projects
-                </h3>
-                <p className="text-xs text-gray-600 mt-1">Not for live coding</p>
-              </div>
-              {tasks.filter(t => t.category === 'pet-projects').map((task) => {
-                const isActive = task.id === currentTaskId;
-                return (
-                  <a
-                    key={task.id}
-                    ref={isActive ? activeTaskRef : undefined}
-                    href={`/tasks/${task.id}`}
-                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                      isActive
-                        ? 'bg-primary-600/20 border-r-2 border-primary-500 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    }`}
-                  >
-                    {/* Difficulty Indicator */}
-                    <span
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${difficultyDots[task.difficulty]}`}
-                      aria-label={task.difficulty}
-                    />
-
-                    {/* Task Title */}
-                    <span className="flex-1 text-sm truncate">{task.title}</span>
-
-                    {/* Difficulty Badge */}
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium text-white flex-shrink-0 ${difficultyColors[task.difficulty]}`}
-                    >
-                      {task.difficulty.charAt(0).toUpperCase()}
-                    </span>
-                  </a>
-                );
-              })}
-            </>
-          )}
         </nav>
       </div>
 

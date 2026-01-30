@@ -3,10 +3,12 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const allTasks = await getCollection('tasks');
-const sortedTasks = allTasks.sort((a, b) => a.data.title.localeCompare(b.data.title));
+// Filter out pet projects - they have their own page
+const practiceTasks = allTasks.filter(task => task.data.category !== 'pet-projects');
+const sortedTasks = practiceTasks.sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 // Extract unique tags and difficulties for filters
-const allTags = [...new Set(allTasks.flatMap(task => task.data.tags))].sort();
+const allTags = [...new Set(practiceTasks.flatMap(task => task.data.tags))].sort();
 const difficulties = ['easy', 'medium', 'hard'];
 
 const difficultyColors = {
@@ -30,17 +32,25 @@ const difficultyBorderColors = {
         Browse All Tasks
       </h1>
       <p class="text-xl text-gray-400 mb-8">
-        {allTasks.length} React challenges to sharpen your skills
+        {practiceTasks.length} React challenges to sharpen your skills
       </p>
-      <a
-        href="/tasks/random"
-        class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Random Task
-      </a>
+      <div class="flex items-center justify-center gap-4">
+        <a
+          href="/tasks/random"
+          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Random Task
+        </a>
+        <a
+          href="/pet-projects"
+          class="inline-flex items-center px-6 py-3 bg-transparent hover:bg-gray-800 text-gray-300 hover:text-white font-medium rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200"
+        >
+          Pet Projects
+        </a>
+      </div>
     </div>
   </div>
 
@@ -108,7 +118,7 @@ const difficultyBorderColors = {
 
       <!-- Results Count -->
       <div class="text-sm text-gray-400">
-        Showing <span id="results-count">{allTasks.length}</span> of {allTasks.length} tasks
+        Showing <span id="results-count">{practiceTasks.length}</span> of {practiceTasks.length} tasks
       </div>
     </div>
 
