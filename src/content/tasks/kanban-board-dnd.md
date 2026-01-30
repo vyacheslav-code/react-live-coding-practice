@@ -8,6 +8,7 @@ tags:
   - undo-redo
   - complex-ui
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement multi-column drag and drop with HTML5 API

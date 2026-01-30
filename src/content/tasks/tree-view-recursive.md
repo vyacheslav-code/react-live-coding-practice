@@ -8,6 +8,7 @@ tags:
   - performance
   - state-management
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Master recursive component patterns for nested data

@@ -6,6 +6,7 @@ tags:
   - patterns
   - generics
 difficulty: hard
+category: pet-projects
 timeEstimate: 35
 learningGoals:
   - Create type-safe event emitter patterns

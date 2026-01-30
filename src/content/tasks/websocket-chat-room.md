@@ -8,6 +8,7 @@ tags:
   - state-management
   - useEffect
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement WebSocket connection lifecycle management
