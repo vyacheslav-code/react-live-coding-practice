@@ -29,154 +29,37 @@ starterCode: |
   }));
 
   export default function App() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    // TODO: Add state for currentPage and itemsPerPage
 
-    // TODO: Calculate pagination
-    const totalPages = Math.ceil(allUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentUsers = allUsers.slice(startIndex, endIndex);
+    // TODO: Calculate pagination values
+    // - totalPages = Math.ceil(totalItems / itemsPerPage)
+    // - startIndex, endIndex for slicing
+    // - currentUsers = allUsers.slice(startIndex, endIndex)
 
-    // TODO: Handle page change
-    const goToPage = (page) => {
-      // Clamp page to valid range
-      const validPage = Math.max(1, Math.min(page, totalPages));
-      setCurrentPage(validPage);
-    };
+    // TODO: Handle page change (with bounds checking)
 
-    // Reset to page 1 when items per page changes
-    const handleItemsPerPageChange = (newValue) => {
-      setItemsPerPage(newValue);
-      setCurrentPage(1);
-    };
+    // TODO: Handle items per page change (reset to page 1)
 
     return (
       <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
         <h1>User List</h1>
 
-        {/* Items per page selector */}
-        <div style={{ marginBottom: '16px' }}>
-          <label>
-            Items per page:{' '}
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              style={{ padding: '4px 8px' }}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </label>
-        </div>
+        {/* TODO: Items per page selector (dropdown: 5, 10, 20, 50) */}
 
-        {/* User list */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-          <thead>
-            <tr style={{ background: '#f3f4f6' }}>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>ID</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>Name</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentUsers.map(user => (
-              <tr key={user.id}>
-                <td style={{ padding: '12px', borderBottom: '1px solid #e5e7eb' }}>{user.id}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #e5e7eb' }}>{user.name}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #e5e7eb' }}>{user.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* TODO: User table showing currentUsers */}
 
-        {/* Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={goToPage}
-        />
+        {/* TODO: Pagination component with prev/next and page numbers */}
 
-        {/* Info */}
-        <div style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
-          Showing {startIndex + 1}-{Math.min(endIndex, allUsers.length)} of {allUsers.length} users
-        </div>
+        {/* TODO: Info text showing "Showing X-Y of Z users" */}
       </div>
     );
   }
 
-  function Pagination({ currentPage, totalPages, onPageChange }) {
-    // TODO: Generate page numbers to display
-    // For large datasets, show: 1 ... 4 5 6 ... 20
-    const getPageNumbers = () => {
-      const pages = [];
-      // Simple version: show all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-      return pages;
-    };
-
-    const pages = getPageNumbers();
-
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Previous button */}
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            padding: '8px 12px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            background: 'white',
-            cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-            opacity: currentPage === 1 ? 0.5 : 1,
-          }}
-        >
-          ← Prev
-        </button>
-
-        {/* Page numbers */}
-        {pages.map(page => (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid',
-              borderColor: page === currentPage ? '#3b82f6' : '#d1d5db',
-              borderRadius: '6px',
-              background: page === currentPage ? '#3b82f6' : 'white',
-              color: page === currentPage ? 'white' : '#374151',
-              cursor: 'pointer',
-              fontWeight: page === currentPage ? 600 : 400,
-            }}
-          >
-            {page}
-          </button>
-        ))}
-
-        {/* Next button */}
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            padding: '8px 12px',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            background: 'white',
-            cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-            opacity: currentPage === totalPages ? 0.5 : 1,
-          }}
-        >
-          Next →
-        </button>
-      </div>
-    );
-  }
+  // TODO: Create Pagination component
+  // Props: currentPage, totalPages, onPageChange
+  // - Prev button (disabled on first page)
+  // - Page number buttons (highlight current)
+  // - Next button (disabled on last page)
 ---
 
 ## Task

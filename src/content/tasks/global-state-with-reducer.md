@@ -7,6 +7,7 @@ tags:
   - state management
   - redux pattern
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement Redux-like architecture with useReducer

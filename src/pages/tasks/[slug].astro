@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TaskHeader from '../../components/TaskHeader.astro';
 import CopyButton from '../../components/CopyButton';
 import HintAccordion from '../../components/HintAccordion';
+import TaskCompletionButton from '../../components/TaskCompletionButton';
 
 export async function getStaticPaths() {
   const tasks = await getCollection('tasks');
@@ -41,7 +42,10 @@ const difficultyColors = {
   <main class="max-w-6xl mx-auto px-6 py-8 pb-16">
     <!-- Task Header -->
     <div class="mb-8">
-      <h1 class="text-4xl font-bold text-white mb-4">{task.data.title}</h1>
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+        <h1 class="text-4xl font-bold text-white">{task.data.title}</h1>
+        <TaskCompletionButton taskId={task.id} client:load />
+      </div>
 
       <div class="flex flex-wrap gap-2 mb-4">
         <span class={`px-3 py-1 rounded-full text-sm font-medium text-white ${difficultyColors[task.data.difficulty]}`}>

@@ -2,22 +2,172 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Get all tasks for client-side random selection
+// Get all practice tasks (exclude pet-projects) with their difficulty
 const allTasks = await getCollection('tasks');
-const taskSlugs = allTasks.map(task => task.id);
+const practiceTasks = allTasks.filter(task => task.data.category !== 'pet-projects');
+
+// Group tasks by difficulty
+const tasksByDifficulty = {
+  all: practiceTasks.map(t => ({ id: t.id, difficulty: t.data.difficulty })),
+  easy: practiceTasks.filter(t => t.data.difficulty === 'easy').map(t => ({ id: t.id, difficulty: t.data.difficulty })),
+  medium: practiceTasks.filter(t => t.data.difficulty === 'medium').map(t => ({ id: t.id, difficulty: t.data.difficulty })),
+  hard: practiceTasks.filter(t => t.data.difficulty === 'hard').map(t => ({ id: t.id, difficulty: t.data.difficulty })),
+};
+
+const counts = {
+  all: tasksByDifficulty.all.length,
+  easy: tasksByDifficulty.easy.length,
+  medium: tasksByDifficulty.medium.length,
+  hard: tasksByDifficulty.hard.length,
+};
 ---
 
 <BaseLayout title="Random Task - React Live Coding Practice">
-  <div class="min-h-screen flex items-center justify-center bg-gray-900">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-white mb-4">Loading Random Task...</h1>
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+  <div class="min-h-[80vh] flex items-center justify-center">
+    <div class="text-center max-w-2xl mx-auto px-6">
+      <!-- Loading State (hidden by default, shown when redirecting) -->
+      <div id="loading-state" class="hidden">
+        <h1 class="text-4xl font-bold text-white mb-4">Loading Random Task...</h1>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="text-gray-400 mt-4 text-sm">Selecting from incomplete tasks...</p>
+      </div>
+
+      <!-- Selection State -->
+      <div id="selection-state">
+        <h1 class="text-4xl font-bold text-white mb-2">Random Task</h1>
+        <p class="text-gray-400 mb-8">Select a difficulty level to get a random incomplete task</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <!-- Any Difficulty -->
+          <button
+            data-difficulty="all"
+            class="random-btn group p-6 bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-blue-500 rounded-xl transition-all duration-200"
+          >
+            <div class="text-3xl mb-2">🎲</div>
+            <div class="text-lg font-semibold text-white">Any</div>
+            <div class="text-sm text-gray-400" id="count-all">{counts.all} tasks</div>
+          </button>
+
+          <!-- Easy -->
+          <button
+            data-difficulty="easy"
+            class="random-btn group p-6 bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-green-500 rounded-xl transition-all duration-200"
+          >
+            <div class="w-8 h-8 rounded-full bg-green-600 mx-auto mb-2"></div>
+            <div class="text-lg font-semibold text-white">Easy</div>
+            <div class="text-sm text-gray-400" id="count-easy">{counts.easy} tasks</div>
+          </button>
+
+          <!-- Medium -->
+          <button
+            data-difficulty="medium"
+            class="random-btn group p-6 bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-yellow-500 rounded-xl transition-all duration-200"
+          >
+            <div class="w-8 h-8 rounded-full bg-yellow-600 mx-auto mb-2"></div>
+            <div class="text-lg font-semibold text-white">Medium</div>
+            <div class="text-sm text-gray-400" id="count-medium">{counts.medium} tasks</div>
+          </button>
+
+          <!-- Hard -->
+          <button
+            data-difficulty="hard"
+            class="random-btn group p-6 bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-red-500 rounded-xl transition-all duration-200"
+          >
+            <div class="w-8 h-8 rounded-full bg-red-600 mx-auto mb-2"></div>
+            <div class="text-lg font-semibold text-white">Hard</div>
+            <div class="text-sm text-gray-400" id="count-hard">{counts.hard} tasks</div>
+          </button>
+        </div>
+
+        <p class="text-sm text-gray-500">
+          Completed tasks are excluded. <span id="incomplete-info"></span>
+        </p>
+
+        <div class="mt-8">
+          <a href="/tasks" class="text-gray-400 hover:text-white transition-colors">
+            ← Back to all tasks
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script define:vars={{ taskSlugs }}>
-    // Redirect to random task
-    const randomSlug = taskSlugs[Math.floor(Math.random() * taskSlugs.length)];
-    window.location.href = `/tasks/${randomSlug}`;
+  <script define:vars={{ tasksByDifficulty }}>
+    const STORAGE_KEY = 'completed-tasks';
+
+    function getCompletedTasks() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function getIncompleteTasks(tasks) {
+      const completed = getCompletedTasks();
+      return tasks.filter(t => !completed.includes(t.id));
+    }
+
+    function selectRandomTask(difficulty) {
+      const tasks = tasksByDifficulty[difficulty] || tasksByDifficulty.all;
+      let available = getIncompleteTasks(tasks);
+
+      // If all tasks of this difficulty are completed, use all tasks of this difficulty
+      if (available.length === 0) {
+        available = tasks;
+      }
+
+      if (available.length === 0) {
+        alert('No tasks available for this difficulty');
+        return;
+      }
+
+      // Show loading state
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('selection-state').classList.add('hidden');
+
+      // Redirect to random task
+      const randomTask = available[Math.floor(Math.random() * available.length)];
+      window.location.href = `/tasks/${randomTask.id}`;
+    }
+
+    // Update counts to show incomplete only
+    function updateCounts() {
+      const completed = getCompletedTasks();
+
+      ['all', 'easy', 'medium', 'hard'].forEach(diff => {
+        const tasks = tasksByDifficulty[diff];
+        const incomplete = tasks.filter(t => !completed.includes(t.id));
+        const countEl = document.getElementById(`count-${diff}`);
+        if (countEl) {
+          countEl.textContent = `${incomplete.length}/${tasks.length} remaining`;
+        }
+      });
+
+      const allIncomplete = getIncompleteTasks(tasksByDifficulty.all);
+      const infoEl = document.getElementById('incomplete-info');
+      if (infoEl && allIncomplete.length < tasksByDifficulty.all.length) {
+        infoEl.textContent = `(${tasksByDifficulty.all.length - allIncomplete.length} completed)`;
+      }
+    }
+
+    // Check for difficulty param in URL (for direct linking)
+    const urlParams = new URLSearchParams(window.location.search);
+    const difficultyParam = urlParams.get('difficulty');
+    if (difficultyParam && ['all', 'easy', 'medium', 'hard'].includes(difficultyParam)) {
+      selectRandomTask(difficultyParam);
+    } else {
+      // Update counts on page load
+      updateCounts();
+
+      // Add click handlers to buttons
+      document.querySelectorAll('.random-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const difficulty = btn.dataset.difficulty;
+          selectRandomTask(difficulty);
+        });
+      });
+    }
   </script>
 </BaseLayout>

@@ -31,10 +31,13 @@ const difficultyBorderColors = {
       <h1 class="text-5xl font-bold text-white mb-4">
         Browse All Tasks
       </h1>
-      <p class="text-xl text-gray-400 mb-8">
+      <p class="text-xl text-gray-400 mb-2">
         {practiceTasks.length} React challenges to sharpen your skills
       </p>
-      <div class="flex items-center justify-center gap-4">
+      <p id="completion-stats" class="text-sm text-gray-500 mb-8">
+        <span id="completed-count">0</span> completed
+      </p>
+      <div class="flex items-center justify-center gap-4 flex-wrap">
         <a
           href="/tasks/random"
           class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
@@ -50,6 +53,15 @@ const difficultyBorderColors = {
         >
           Pet Projects
         </a>
+        <button
+          id="reset-completed"
+          class="inline-flex items-center px-6 py-3 bg-transparent hover:bg-red-900/30 text-red-400 hover:text-red-300 font-medium rounded-lg border border-red-900 hover:border-red-700 transition-colors duration-200"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset Progress
+        </button>
       </div>
     </div>
   </div>
@@ -107,6 +119,16 @@ const difficultyBorderColors = {
           </select>
         </div>
 
+        <!-- Hide Completed Toggle -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            id="hide-completed"
+            class="w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
+          />
+          <span class="text-sm text-gray-400">Hide completed</span>
+        </label>
+
         <!-- Clear Filters -->
         <button
           id="clear-filters"
@@ -127,12 +149,22 @@ const difficultyBorderColors = {
       {sortedTasks.map((task) => (
         <a
           href={`/tasks/${task.id}`}
-          class="task-card group block bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-200"
+          class="task-card group block bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-200 relative"
           data-difficulty={task.data.difficulty}
           data-tags={task.data.tags.join(',')}
           data-title={task.data.title.toLowerCase()}
           data-description={task.data.description.toLowerCase()}
+          data-task-id={task.id}
         >
+          <!-- Completion Badge (hidden by default, shown via JS) -->
+          <div class="completion-badge absolute top-3 right-3 hidden">
+            <span class="inline-flex items-center justify-center w-6 h-6 bg-green-600 rounded-full">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+          </div>
+
           <!-- Difficulty Badge -->
           <div class="mb-4">
             <span class={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold text-white ${difficultyColors[task.data.difficulty]}`}>
@@ -188,10 +220,30 @@ const difficultyBorderColors = {
   </div>
 
   <script>
+    const STORAGE_KEY = 'completed-tasks';
+
+    // Get completed tasks from localStorage
+    function getCompletedTasks(): string[] {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    // Clear all completed tasks
+    function clearAllCompleted(): void {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+    }
+
     // Filter functionality
     const searchInput = document.getElementById('search') as HTMLInputElement;
     const tagFilter = document.getElementById('tag-filter') as HTMLSelectElement;
     const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+    const hideCompletedCheckbox = document.getElementById('hide-completed') as HTMLInputElement;
+    const resetCompletedBtn = document.getElementById('reset-completed') as HTMLButtonElement;
+    const completedCountSpan = document.getElementById('completed-count') as HTMLSpanElement;
     const difficultyButtons = document.querySelectorAll('.filter-difficulty');
     const taskCards = document.querySelectorAll('.task-card');
     const resultsCount = document.getElementById('results-count') as HTMLSpanElement;
@@ -201,10 +253,35 @@ const difficultyBorderColors = {
     let activeFilters = {
       difficulty: 'all',
       tag: 'all',
-      search: ''
+      search: '',
+      hideCompleted: false
     };
 
+    // Update completion badges and count
+    function updateCompletionUI() {
+      const completedTasks = getCompletedTasks();
+      let completedCount = 0;
+
+      taskCards.forEach((card) => {
+        const element = card as HTMLElement;
+        const taskId = element.dataset.taskId || '';
+        const badge = element.querySelector('.completion-badge');
+
+        if (completedTasks.includes(taskId)) {
+          badge?.classList.remove('hidden');
+          element.classList.add('completed');
+          completedCount++;
+        } else {
+          badge?.classList.add('hidden');
+          element.classList.remove('completed');
+        }
+      });
+
+      completedCountSpan.textContent = completedCount.toString();
+    }
+
     function filterTasks() {
+      const completedTasks = getCompletedTasks();
       let visibleCount = 0;
 
       taskCards.forEach((card) => {
@@ -212,6 +289,8 @@ const difficultyBorderColors = {
         const difficulty = element.dataset.difficulty || '';
         const tags = (element.dataset.tags || '').split(',');
         const searchText = `${element.dataset.title} ${element.dataset.description}`;
+        const taskId = element.dataset.taskId || '';
+        const isCompleted = completedTasks.includes(taskId);
 
         // Check difficulty filter
         const difficultyMatch = activeFilters.difficulty === 'all' || difficulty === activeFilters.difficulty;
@@ -222,8 +301,11 @@ const difficultyBorderColors = {
         // Check search filter
         const searchMatch = activeFilters.search === '' || searchText.includes(activeFilters.search.toLowerCase());
 
+        // Check completed filter
+        const completedMatch = !activeFilters.hideCompleted || !isCompleted;
+
         // Show/hide card
-        if (difficultyMatch && tagMatch && searchMatch) {
+        if (difficultyMatch && tagMatch && searchMatch && completedMatch) {
           element.classList.remove('hidden');
           visibleCount++;
         } else {
@@ -244,6 +326,10 @@ const difficultyBorderColors = {
       }
     }
 
+    // Initialize completion UI on page load
+    updateCompletionUI();
+    filterTasks();
+
     // Search input handler
     searchInput.addEventListener('input', (e) => {
       activeFilters.search = (e.target as HTMLInputElement).value;
@@ -254,6 +340,21 @@ const difficultyBorderColors = {
     tagFilter.addEventListener('change', (e) => {
       activeFilters.tag = (e.target as HTMLSelectElement).value;
       filterTasks();
+    });
+
+    // Hide completed handler
+    hideCompletedCheckbox.addEventListener('change', (e) => {
+      activeFilters.hideCompleted = (e.target as HTMLInputElement).checked;
+      filterTasks();
+    });
+
+    // Reset completed handler
+    resetCompletedBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+        clearAllCompleted();
+        updateCompletionUI();
+        filterTasks();
+      }
     });
 
     // Difficulty filter handler
@@ -275,12 +376,14 @@ const difficultyBorderColors = {
       activeFilters = {
         difficulty: 'all',
         tag: 'all',
-        search: ''
+        search: '',
+        hideCompleted: false
       };
 
       // Reset UI
       searchInput.value = '';
       tagFilter.value = 'all';
+      hideCompletedCheckbox.checked = false;
       difficultyButtons.forEach(btn => btn.classList.remove('active', 'bg-gray-700', 'border-gray-600'));
       difficultyButtons[0].classList.add('active', 'bg-gray-700', 'border-gray-600');
 
