@@ -6,6 +6,7 @@ tags:
   - forms
   - generics
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Build schema-driven forms with type inference

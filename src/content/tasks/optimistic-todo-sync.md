@@ -8,6 +8,7 @@ tags:
   - error-handling
   - sync
 difficulty: hard
+category: pet-projects
 timeEstimate: 35
 learningGoals:
   - Implement optimistic UI updates for instant feedback

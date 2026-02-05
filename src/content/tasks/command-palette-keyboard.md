@@ -8,6 +8,7 @@ tags:
   - performance
   - portal
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement global keyboard shortcuts with proper event handling

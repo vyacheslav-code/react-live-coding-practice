@@ -7,6 +7,7 @@ tags:
   - state machines
   - forms
 difficulty: hard
+category: pet-projects
 timeEstimate: 35
 learningGoals:
   - Implement finite state machine pattern

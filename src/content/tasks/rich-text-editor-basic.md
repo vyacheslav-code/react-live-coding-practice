@@ -8,6 +8,7 @@ tags:
   - text-manipulation
   - accessibility
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Master contentEditable API and its quirks

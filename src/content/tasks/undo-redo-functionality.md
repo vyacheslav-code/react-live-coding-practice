@@ -7,6 +7,7 @@ tags:
   - command pattern
   - history
 difficulty: hard
+category: pet-projects
 timeEstimate: 40
 learningGoals:
   - Implement command pattern for undo/redo

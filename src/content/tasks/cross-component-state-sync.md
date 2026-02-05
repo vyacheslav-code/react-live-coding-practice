@@ -7,6 +7,7 @@ tags:
   - custom hooks
   - memory management
 difficulty: hard
+category: pet-projects
 timeEstimate: 35
 learningGoals:
   - Implement custom event emitter for cross-component communication

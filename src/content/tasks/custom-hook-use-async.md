@@ -8,6 +8,7 @@ tags:
   - advanced
   - performance
 difficulty: hard
+category: pet-projects
 timeEstimate: 35
 learningGoals:
   - Implement request cancellation with AbortController
